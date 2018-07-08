@@ -1,0 +1,9 @@
+{
+    "db": {
+        "host": "database:2017",
+        "database": "hlcup2017"
+    },
+    "data": "data/data.zip",
+    "host": "",
+    "port": "8000"
+}

@@ -8,6 +8,9 @@ import (
 )
 
 func main() {
+	// configuration := LoadConfiguration("config.json")
+	// host, db := configuration.DB.Host, configuration.DB.Database
+
 	router := mux.NewRouter()
 
 	router.HandleFunc("/users/{id:[0-9]+}", nil).Methods("GET")
