@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/lzakharov/hlcup2017/models"
@@ -12,14 +11,9 @@ import (
 // GetVisit returns specified visit.
 func GetVisit(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+	id, _ := vars["id"]
 
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	visit, err := models.GetVisit(uint32(id))
+	visit, err := models.GetVisit(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return

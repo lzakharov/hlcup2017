@@ -2,6 +2,8 @@ package models
 
 import "log"
 
+const locationsTableName = "locations"
+
 // Location contains information about location.
 type Location struct {
 	ID       uint32 `json:"id" db:"id"`
@@ -17,9 +19,9 @@ type Locations struct {
 }
 
 // GetLocation returns location from database specified by id.
-func GetLocation(id uint32) (Location, error) {
+func GetLocation(id string) (Location, error) {
 	location := Location{}
-	if err := DB.Get(&location, "SELECT * FROM locations WHERE id=$1", id); err != nil {
+	if err := GetByID(locationsTableName, id, &location); err != nil {
 		return location, err
 	}
 	return location, nil

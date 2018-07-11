@@ -33,7 +33,7 @@ func main() {
 	r.HandleFunc("/", DumbHandler).Methods("GET")
 
 	r.HandleFunc("/users/{id:[0-9]+}", handlers.GetUser).Methods("GET")
-	r.HandleFunc("/users/{id:[0-9]+}/visits", nil).Methods("GET")
+	r.HandleFunc("/users/{id:[0-9]+}/visits", handlers.GetUserVisits).Methods("GET")
 	r.HandleFunc("/users/{id:[0-9]+}", nil).Methods("POST")
 	r.HandleFunc("/users/new", nil).Methods("POST")
 

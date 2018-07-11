@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 
@@ -34,4 +35,15 @@ func CreateSchema(file string) {
 	}
 
 	DB.MustExec(string(schema))
+}
+
+// GetByID retrieves specified by id model from database.
+func GetByID(table string, id string, dest interface{}) error {
+	q := fmt.Sprintf("SELECT * FROM %s WHERE id=$1", table)
+
+	if err := DB.Get(dest, q, id); err != nil {
+		return err
+	}
+
+	return nil
 }

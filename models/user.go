@@ -1,6 +1,10 @@
 package models
 
-import "log"
+import (
+	"log"
+)
+
+const usersTableName = "users"
 
 // User contains information about user.
 type User struct {
@@ -18,12 +22,21 @@ type Users struct {
 }
 
 // GetUser returns user from database specified by id.
-func GetUser(id uint32) (User, error) {
+func GetUser(id string) (User, error) {
 	user := User{}
-	if err := DB.Get(&user, "SELECT * FROM users WHERE id=$1", id); err != nil {
+	if err := GetByID(usersTableName, id, &user); err != nil {
 		return user, err
 	}
 	return user, nil
+}
+
+// GetUserVisits returns user's visits from database specified by user's id.
+func GetUserVisits(id string) (Visits, error) {
+	visits := Visits{}
+	if err := DB.Select(&visits.Rows, "SELECT * FROM visits WHERE \"user\"=$1", id); err != nil {
+		return visits, err
+	}
+	return visits, nil
 }
 
 // InsertUser inserts specified user into database.

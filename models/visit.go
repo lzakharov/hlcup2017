@@ -2,6 +2,8 @@ package models
 
 import "log"
 
+const visitsTableName = "visits"
+
 // Visit contains information about visit.
 type Visit struct {
 	ID        uint32 `json:"id" db:"id"`
@@ -17,9 +19,9 @@ type Visits struct {
 }
 
 // GetVisit returns visit from database specified by id.
-func GetVisit(id uint32) (Visit, error) {
+func GetVisit(id string) (Visit, error) {
 	visit := Visit{}
-	if err := DB.Get(&visit, "SELECT * FROM visits WHERE id=$1", id); err != nil {
+	if err := GetByID(visitsTableName, id, &visit); err != nil {
 		return visit, err
 	}
 	return visit, nil
