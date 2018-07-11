@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"encoding/json"
@@ -8,13 +8,18 @@ import (
 
 // Configuration represents project configuration data.
 type Configuration struct {
-	DB struct {
-		Host     string `json:"host"`
-		Database string `json:"database"`
-	} `json:"db"`
-	Data string `json:"data"`
 	Host string `json:"host"`
-	Port string `json:"port"`
+	Port int    `json:"port"`
+	DB   struct {
+		Driver   string `json:"driver"`
+		Host     string `json:"host"`
+		Port     int    `json:"port"`
+		User     string `json:"user"`
+		Password string `json:"password"`
+		Name     string `json:"name"`
+		SSLMode  string `json:"sslmode"`
+		Schema   string `json:"schema"`
+	} `json:"db"`
 }
 
 // LoadConfiguration returns project configuration loaded from the JSON file.

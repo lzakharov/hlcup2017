@@ -1,31 +1,47 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/lzakharov/hlcup2017/config"
+	"github.com/lzakharov/hlcup2017/models"
 )
 
+func DumbHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Hello, I'm Web Server!"))
+}
+
 func main() {
-	// configuration := LoadConfiguration("config.json")
-	// host, db := configuration.DB.Host, configuration.DB.Database
+	c := config.LoadConfiguration("config.json")
 
-	router := mux.NewRouter()
+	db := c.DB
+	dataSourceName := fmt.Sprintf(
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+		db.Host, db.Port, db.User, db.Password, db.Name, db.SSLMode)
+	models.InitDatabase(db.Driver, dataSourceName)
+	models.CreateSchema(db.Schema)
 
-	router.HandleFunc("/users/{id:[0-9]+}", nil).Methods("GET")
-	router.HandleFunc("/users/{id:[0-9]+}/visits", nil).Methods("GET")
-	router.HandleFunc("/users/{id:[0-9]+}", nil).Methods("POST")
-	router.HandleFunc("/users/new", nil).Methods("POST")
+	r := mux.NewRouter()
 
-	router.HandleFunc("/locations/{id:[0-9]+}", nil).Methods("GET")
-	router.HandleFunc("/locations/{id:[0-9]+}/avg", nil).Methods("GET")
-	router.HandleFunc("/locations/{id:[0-9]+}", nil).Methods("POST")
-	router.HandleFunc("/locations/new", nil).Methods("POST")
+	r.HandleFunc("/", DumbHandler).Methods("GET")
 
-	router.HandleFunc("/visits/{id:[0-9]+}", nil).Methods("GET")
-	router.HandleFunc("/visits/{id:[0-9]+}", nil).Methods("POST")
-	router.HandleFunc("/visits/new", nil).Methods("POST")
+	r.HandleFunc("/users/{id:[0-9]+}", nil).Methods("GET")
+	r.HandleFunc("/users/{id:[0-9]+}/visits", nil).Methods("GET")
+	r.HandleFunc("/users/{id:[0-9]+}", nil).Methods("POST")
+	r.HandleFunc("/users/new", nil).Methods("POST")
 
-	log.Fatal(http.ListenAndServe(":8000", router))
+	r.HandleFunc("/locations/{id:[0-9]+}", nil).Methods("GET")
+	r.HandleFunc("/locations/{id:[0-9]+}/avg", nil).Methods("GET")
+	r.HandleFunc("/locations/{id:[0-9]+}", nil).Methods("POST")
+	r.HandleFunc("/locations/new", nil).Methods("POST")
+
+	r.HandleFunc("/visits/{id:[0-9]+}", nil).Methods("GET")
+	r.HandleFunc("/visits/{id:[0-9]+}", nil).Methods("POST")
+	r.HandleFunc("/visits/new", nil).Methods("POST")
+
+	addr := fmt.Sprintf("%s:%d", c.Host, c.Port)
+	log.Fatal(http.ListenAndServe(addr, r))
 }
