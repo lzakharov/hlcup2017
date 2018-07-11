@@ -4,16 +4,25 @@ import "log"
 
 // Location contains information about location.
 type Location struct {
-	ID       uint32 `json:"id"`
-	Place    string `json:"place"`
-	Country  string `json:"country"`
-	City     string `json:"city"`
-	Distance uint32 `json:"distance"`
+	ID       uint32 `json:"id" db:"id"`
+	Place    string `json:"place" db:"place"`
+	Country  string `json:"country" db:"country"`
+	City     string `json:"city" db:"city"`
+	Distance uint32 `json:"distance" db:"distance"`
 }
 
 // Locations contains list of locations.
 type Locations struct {
 	Rows []*Location `json:"locations"`
+}
+
+// GetLocation returns location from database specified by id.
+func GetLocation(id uint32) (Location, error) {
+	location := Location{}
+	if err := DB.Get(&location, "SELECT * FROM locations WHERE id=$1", id); err != nil {
+		return location, err
+	}
+	return location, nil
 }
 
 // InsertLocation inserts specified location into database.

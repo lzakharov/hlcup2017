@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/lzakharov/hlcup2017/config"
+	"github.com/lzakharov/hlcup2017/handlers"
 	"github.com/lzakharov/hlcup2017/models"
 	"github.com/lzakharov/hlcup2017/utils"
 )
@@ -31,17 +32,17 @@ func main() {
 
 	r.HandleFunc("/", DumbHandler).Methods("GET")
 
-	r.HandleFunc("/users/{id:[0-9]+}", nil).Methods("GET")
+	r.HandleFunc("/users/{id:[0-9]+}", handlers.GetUser).Methods("GET")
 	r.HandleFunc("/users/{id:[0-9]+}/visits", nil).Methods("GET")
 	r.HandleFunc("/users/{id:[0-9]+}", nil).Methods("POST")
 	r.HandleFunc("/users/new", nil).Methods("POST")
 
-	r.HandleFunc("/locations/{id:[0-9]+}", nil).Methods("GET")
+	r.HandleFunc("/locations/{id:[0-9]+}", handlers.GetLocation).Methods("GET")
 	r.HandleFunc("/locations/{id:[0-9]+}/avg", nil).Methods("GET")
 	r.HandleFunc("/locations/{id:[0-9]+}", nil).Methods("POST")
 	r.HandleFunc("/locations/new", nil).Methods("POST")
 
-	r.HandleFunc("/visits/{id:[0-9]+}", nil).Methods("GET")
+	r.HandleFunc("/visits/{id:[0-9]+}", handlers.GetVisit).Methods("GET")
 	r.HandleFunc("/visits/{id:[0-9]+}", nil).Methods("POST")
 	r.HandleFunc("/visits/new", nil).Methods("POST")
 
