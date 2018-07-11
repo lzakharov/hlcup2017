@@ -31,15 +31,14 @@ func GetUserVisits(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := vars["id"]
 
-	// TODO: Add filtering
-	visits, err := models.GetUserVisits(id)
+	places, err := models.GetUserVisits(id, r.URL.Query())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(visits); err != nil {
+	if err := json.NewEncoder(w).Encode(places); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

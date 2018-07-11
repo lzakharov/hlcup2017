@@ -1,7 +1,9 @@
 package models
 
 import (
+	"fmt"
 	"log"
+	"strings"
 )
 
 const usersTableName = "users"
@@ -31,12 +33,31 @@ func GetUser(id string) (User, error) {
 }
 
 // GetUserVisits returns user's visits from database specified by user's id.
-func GetUserVisits(id string) (Visits, error) {
-	visits := Visits{}
-	if err := DB.Select(&visits.Rows, "SELECT * FROM visits WHERE \"user\"=$1", id); err != nil {
-		return visits, err
+func GetUserVisits(id string, predicates map[string][]string) (Places, error) {
+	var (
+		names      = []string{"fromDate", "toDate", "country", "toDistance"}
+		statements = []string{"visited_at > ", "visited_at < ", "country = ", "distance < "}
+		values     = []interface{}{id}
+		where      = []string{"\"user\" = $1"}
+	)
+
+	for i, name := range names {
+		if value, ok := predicates[name]; ok {
+			values = append(values, value[0])
+			where = append(where, fmt.Sprintf("%s$%d", statements[i], len(values)))
+		}
 	}
-	return visits, nil
+
+	places := Places{[]*Place{}}
+	q := `SELECT mark, visited_at, place 
+		  FROM visits 
+		  INNER JOIN locations ON visits.location = locations.id
+		  WHERE ` + strings.Join(where, " AND ")
+
+	if err := DB.Select(&places.Rows, q, values...); err != nil {
+		return places, err
+	}
+	return places, nil
 }
 
 // InsertUser inserts specified user into database.

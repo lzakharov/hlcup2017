@@ -4,7 +4,7 @@ import "log"
 
 const visitsTableName = "visits"
 
-// Visit contains information about visit.
+// Visit contains full information about visit.
 type Visit struct {
 	ID        uint32 `json:"id" db:"id"`
 	Location  uint32 `json:"location" db:"location"`
@@ -16,6 +16,18 @@ type Visit struct {
 // Visits contains list of visits.
 type Visits struct {
 	Rows []*Visit `json:"visits"`
+}
+
+// Place conrains short description about visited place.
+type Place struct {
+	Mark      uint8  `json:"mark" db:"mark"`
+	VisitedAt int32  `json:"visited_at" db:"visited_at"`
+	Place     string `json:"place" db:"place"`
+}
+
+// Places contains list of visited places.
+type Places struct {
+	Rows []*Place `json:"visits"`
 }
 
 // GetVisit returns visit from database specified by id.
