@@ -20,6 +20,7 @@ type Configuration struct {
 		SSLMode  string `json:"sslmode"`
 		Schema   string `json:"schema"`
 	} `json:"db"`
+	Data string `json:"data"`
 }
 
 // LoadConfiguration returns project configuration loaded from the JSON file.

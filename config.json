@@ -10,5 +10,6 @@
         "name": "postgres",
         "sslmode": "disable",
         "schema": "schema.sql"
-    }
+    },
+    "data": "data/data.zip"
 }

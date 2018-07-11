@@ -1,3 +1,6 @@
+DROP TABLE IF EXISTS users, locations, visits;
+DROP TYPE IF EXISTS gender;
+
 CREATE TYPE gender AS ENUM ('m', 'f');
 
 CREATE TABLE IF NOT EXISTS users (

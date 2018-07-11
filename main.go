@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/lzakharov/hlcup2017/config"
 	"github.com/lzakharov/hlcup2017/models"
+	"github.com/lzakharov/hlcup2017/utils"
 )
 
 func DumbHandler(w http.ResponseWriter, r *http.Request) {
@@ -23,6 +24,8 @@ func main() {
 		db.Host, db.Port, db.User, db.Password, db.Name, db.SSLMode)
 	models.InitDatabase(db.Driver, dataSourceName)
 	models.CreateSchema(db.Schema)
+
+	utils.LoadData(c.Data)
 
 	r := mux.NewRouter()
 
