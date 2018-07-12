@@ -1,7 +1,5 @@
 package models
 
-import "log"
-
 const locationsTableName = "locations"
 
 // Location contains information about location.
@@ -28,13 +26,11 @@ func GetLocation(id string) (Location, error) {
 }
 
 // InsertLocation inserts specified location into database.
-func InsertLocation(location *Location) {
+func InsertLocation(location *Location) error {
 	_, err := DB.NamedExec(
 		`INSERT INTO locations (id, place, country, city, distance) 
 		 VALUES (:id, :place, :country, :city, :distance)`, location)
-	if err != nil {
-		log.Fatal(err)
-	}
+	return err
 }
 
 // PopulateLocations inserts specified list of locations into database.

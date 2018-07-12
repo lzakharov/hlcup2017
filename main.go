@@ -35,16 +35,16 @@ func main() {
 	r.HandleFunc("/users/{id:[0-9]+}", handlers.GetUser).Methods("GET")
 	r.HandleFunc("/users/{id:[0-9]+}/visits", handlers.GetUserVisits).Methods("GET")
 	r.HandleFunc("/users/{id:[0-9]+}", nil).Methods("POST")
-	r.HandleFunc("/users/new", nil).Methods("POST")
+	r.HandleFunc("/users/new", handlers.CreateUser).Methods("POST")
 
 	r.HandleFunc("/locations/{id:[0-9]+}", handlers.GetLocation).Methods("GET")
 	r.HandleFunc("/locations/{id:[0-9]+}/avg", nil).Methods("GET")
 	r.HandleFunc("/locations/{id:[0-9]+}", nil).Methods("POST")
-	r.HandleFunc("/locations/new", nil).Methods("POST")
+	r.HandleFunc("/locations/new", handlers.CreateLocation).Methods("POST")
 
 	r.HandleFunc("/visits/{id:[0-9]+}", handlers.GetVisit).Methods("GET")
 	r.HandleFunc("/visits/{id:[0-9]+}", nil).Methods("POST")
-	r.HandleFunc("/visits/new", nil).Methods("POST")
+	r.HandleFunc("/visits/new", handlers.CreateVisit).Methods("POST")
 
 	addr := fmt.Sprintf("%s:%d", c.Host, c.Port)
 	log.Fatal(http.ListenAndServe(addr, r))

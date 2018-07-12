@@ -25,3 +25,20 @@ func GetVisit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+// CreateVisit creates new visit.
+func CreateVisit(w http.ResponseWriter, r *http.Request) {
+	visit := new(models.Visit)
+	if err := json.NewDecoder(r.Body).Decode(visit); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := models.InsertVisit(visit); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{})
+}

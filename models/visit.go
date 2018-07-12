@@ -1,7 +1,5 @@
 package models
 
-import "log"
-
 const visitsTableName = "visits"
 
 // Visit contains full information about visit.
@@ -40,13 +38,11 @@ func GetVisit(id string) (Visit, error) {
 }
 
 // InsertVisit inserts specified visit into database.
-func InsertVisit(visit *Visit) {
+func InsertVisit(visit *Visit) error {
 	_, err := DB.NamedExec(
 		`INSERT INTO visits (id, location, "user", visited_at, mark) 
 		 VALUES (:id, :location, :user, :visited_at, :mark)`, visit)
-	if err != nil {
-		log.Fatal(err)
-	}
+	return err
 }
 
 // PopulateVisits inserts specified list of Visits into database.

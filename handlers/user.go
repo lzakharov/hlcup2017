@@ -43,3 +43,20 @@ func GetUserVisits(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+// CreateUser creates new user.
+func CreateUser(w http.ResponseWriter, r *http.Request) {
+	user := new(models.User)
+	if err := json.NewDecoder(r.Body).Decode(user); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := models.InsertUser(user); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{})
+}

@@ -2,7 +2,6 @@ package models
 
 import (
 	"fmt"
-	"log"
 	"strings"
 )
 
@@ -61,13 +60,11 @@ func GetUserVisits(id string, predicates map[string][]string) (Places, error) {
 }
 
 // InsertUser inserts specified user into database.
-func InsertUser(user *User) {
+func InsertUser(user *User) error {
 	_, err := DB.NamedExec(
 		`INSERT INTO users (id, email, first_name, last_name, gender, birth_date) 
 		 VALUES (:id, :email, :first_name, :last_name, :gender, :birth_date)`, user)
-	if err != nil {
-		log.Fatal(err)
-	}
+	return err
 }
 
 // PopulateUsers inserts specified list of users into database.
