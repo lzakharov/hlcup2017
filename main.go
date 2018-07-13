@@ -38,7 +38,7 @@ func main() {
 	r.HandleFunc("/users/new", handlers.CreateUser).Methods("POST")
 
 	r.HandleFunc("/locations/{id:[0-9]+}", handlers.GetLocation).Methods("GET")
-	r.HandleFunc("/locations/{id:[0-9]+}/avg", nil).Methods("GET")
+	r.HandleFunc("/locations/{id:[0-9]+}/avg", handlers.GetLocationAverageMark).Methods("GET")
 	r.HandleFunc("/locations/{id:[0-9]+}", nil).Methods("POST")
 	r.HandleFunc("/locations/new", handlers.CreateLocation).Methods("POST")
 

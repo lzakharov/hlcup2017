@@ -26,6 +26,24 @@ func GetLocation(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetLocationAverageMark returns average mark for specified location.
+func GetLocationAverageMark(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, _ := vars["id"]
+
+	avg, err := models.GetLocationAverageMark(id, r.URL.Query())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(avg); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
 // CreateLocation creates new location.
 func CreateLocation(w http.ResponseWriter, r *http.Request) {
 	location := new(models.Location)

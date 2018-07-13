@@ -31,10 +31,8 @@ type Places struct {
 // GetVisit returns visit from database specified by id.
 func GetVisit(id string) (Visit, error) {
 	visit := Visit{}
-	if err := GetByID(visitsTableName, id, &visit); err != nil {
-		return visit, err
-	}
-	return visit, nil
+	err := GetByID(visitsTableName, id, &visit)
+	return visit, err
 }
 
 // InsertVisit inserts specified visit into database.

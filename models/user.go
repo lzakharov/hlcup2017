@@ -25,10 +25,8 @@ type Users struct {
 // GetUser returns user from database specified by id.
 func GetUser(id string) (User, error) {
 	user := User{}
-	if err := GetByID(usersTableName, id, &user); err != nil {
-		return user, err
-	}
-	return user, nil
+	err := GetByID(usersTableName, id, &user)
+	return user, err
 }
 
 // GetUserVisits returns user's visits from database specified by user's id.
@@ -36,8 +34,9 @@ func GetUserVisits(id string, predicates map[string][]string) (Places, error) {
 	var (
 		names      = []string{"fromDate", "toDate", "country", "toDistance"}
 		statements = []string{"visited_at > ", "visited_at < ", "country = ", "distance < "}
-		values     = []interface{}{id}
 		where      = []string{"\"user\" = $1"}
+		values     = []interface{}{id}
+		places     = Places{[]*Place{}}
 	)
 
 	for i, name := range names {
@@ -47,16 +46,13 @@ func GetUserVisits(id string, predicates map[string][]string) (Places, error) {
 		}
 	}
 
-	places := Places{[]*Place{}}
 	q := `SELECT mark, visited_at, place 
 		  FROM visits 
 		  INNER JOIN locations ON visits.location = locations.id
 		  WHERE ` + strings.Join(where, " AND ")
 
-	if err := DB.Select(&places.Rows, q, values...); err != nil {
-		return places, err
-	}
-	return places, nil
+	err := DB.Select(&places.Rows, q, values...)
+	return places, err
 }
 
 // InsertUser inserts specified user into database.
