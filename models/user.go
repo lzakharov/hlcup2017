@@ -72,8 +72,11 @@ func InsertUser(user *User) error {
 }
 
 // PopulateUsers inserts specified list of users into database.
-func PopulateUsers(users Users) {
+func PopulateUsers(users Users) error {
 	for _, user := range users.Rows {
-		InsertUser(user)
+		if err := InsertUser(user); err != nil {
+			return err
+		}
 	}
+	return nil
 }

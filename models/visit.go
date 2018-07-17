@@ -44,8 +44,11 @@ func InsertVisit(visit *Visit) error {
 }
 
 // PopulateVisits inserts specified list of Visits into database.
-func PopulateVisits(visits Visits) {
+func PopulateVisits(visits Visits) error {
 	for _, visit := range visits.Rows {
-		InsertVisit(visit)
+		if err := InsertVisit(visit); err != nil {
+			return err
+		}
 	}
+	return nil
 }

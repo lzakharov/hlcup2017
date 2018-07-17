@@ -79,8 +79,11 @@ func InsertLocation(location *Location) error {
 }
 
 // PopulateLocations inserts specified list of locations into database.
-func PopulateLocations(locations Locations) {
+func PopulateLocations(locations Locations) error {
 	for _, location := range locations.Rows {
-		InsertLocation(location)
+		if err := InsertLocation(location); err != nil {
+			return err
+		}
 	}
+	return nil
 }

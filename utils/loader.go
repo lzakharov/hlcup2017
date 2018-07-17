@@ -56,19 +56,25 @@ func LoadData(archive string) error {
 			if err := parse(reader, &users); err != nil {
 				log.Panic(err)
 			}
-			models.PopulateUsers(users)
+			if err := models.PopulateUsers(users); err != nil {
+				log.Panic(err)
+			}
 		case "locations":
 			var locations models.Locations
 			if err := parse(reader, &locations); err != nil {
 				log.Panic(err)
 			}
-			models.PopulateLocations(locations)
+			if err := models.PopulateLocations(locations); err != nil {
+				log.Panic(err)
+			}
 		case "visits":
 			var visits models.Visits
 			if err := parse(reader, &visits); err != nil {
 				log.Panic(err)
 			}
-			models.PopulateVisits(visits)
+			if err := models.PopulateVisits(visits); err != nil {
+				log.Panic(err)
+			}
 		}
 	}
 
