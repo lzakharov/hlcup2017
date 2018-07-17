@@ -16,18 +16,6 @@ type Visits struct {
 	Rows []*Visit `json:"visits"`
 }
 
-// Place conrains short description about visited place.
-type Place struct {
-	Mark      uint8  `json:"mark" db:"mark"`
-	VisitedAt int32  `json:"visited_at" db:"visited_at"`
-	Place     string `json:"place" db:"place"`
-}
-
-// Places contains list of visited places.
-type Places struct {
-	Rows []*Place `json:"visits"`
-}
-
 // GetVisit returns visit from database specified by id.
 func GetVisit(id string) (Visit, error) {
 	visit := Visit{}
