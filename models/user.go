@@ -51,7 +51,7 @@ func GetUserVisits(id string, params map[string][]string) (Places, error) {
 
 	query := `SELECT mark, visited_at, place
 	FROM visits
-	INNER JOIN locations ON visits.location = locations.id
+	INNER JOIN locations ON visits.location=locations.id
 	WHERE ` + where.Statement
 
 	places := Places{[]*Place{}}
@@ -65,9 +65,8 @@ func GetUserVisits(id string, params map[string][]string) (Places, error) {
 
 // InsertUser inserts specified user into database.
 func InsertUser(user *User) error {
-	_, err := DB.NamedExec(
-		`INSERT INTO users (id, email, first_name, last_name, gender, birth_date) 
-		 VALUES (:id, :email, :first_name, :last_name, :gender, :birth_date)`, user)
+	_, err := DB.NamedExec(`INSERT INTO users (id, email, first_name, last_name, gender, birth_date) 
+	VALUES (:id, :email, :first_name, :last_name, :gender, :birth_date)`, user)
 	return err
 }
 
@@ -79,4 +78,12 @@ func PopulateUsers(users Users) error {
 		}
 	}
 	return nil
+}
+
+// UpdateUser updates specified user's row in database.
+func UpdateUser(params map[string]interface{}) error {
+	query := prepareUpdate(usersTableName,
+		[]string{"email", "first_name", "last_name", "gender", "birth_date"}, params)
+	_, err := DB.NamedExec(query, params)
+	return err
 }

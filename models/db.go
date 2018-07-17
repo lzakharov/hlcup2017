@@ -68,3 +68,14 @@ func prepareWhere(conditions map[string]string, params map[string][]string) Wher
 
 	return Where{strings.Join(where, " AND "), args}
 }
+
+func prepareUpdate(table string, columns []string, params map[string]interface{}) string {
+	statement := []string{}
+	for _, col := range columns {
+		if _, ok := params[col]; ok {
+			statement = append(statement, col+"=:"+col)
+		}
+	}
+	query := "UPDATE " + table + " SET " + strings.Join(statement, ", ") + " WHERE id=:id"
+	return query
+}

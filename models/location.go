@@ -75,3 +75,10 @@ func PopulateLocations(locations Locations) error {
 	}
 	return nil
 }
+
+// UpdateLocation updates specified location's row in database.
+func UpdateLocation(params map[string]interface{}) error {
+	query := prepareUpdate(usersTableName, []string{"place", "country", "city", "distance"}, params)
+	_, err := DB.NamedExec(query, params)
+	return err
+}

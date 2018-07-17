@@ -40,3 +40,10 @@ func PopulateVisits(visits Visits) error {
 	}
 	return nil
 }
+
+// UpdateVisit updates specified visit's row in database.
+func UpdateVisit(params map[string]interface{}) error {
+	query := prepareUpdate(usersTableName, []string{"location", `"user"`, "visited_at", "mark"}, params)
+	_, err := DB.NamedExec(query, params)
+	return err
+}
