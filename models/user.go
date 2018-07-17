@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -30,28 +29,37 @@ func GetUser(id string) (User, error) {
 }
 
 // GetUserVisits returns user's visits from database specified by user's id.
-func GetUserVisits(id string, predicates map[string][]string) (Places, error) {
-	var (
-		names      = []string{"fromDate", "toDate", "country", "toDistance"}
-		statements = []string{"visited_at > ", "visited_at < ", "country = ", "distance < "}
-		where      = []string{"\"user\" = $1"}
-		values     = []interface{}{id}
-		places     = Places{[]*Place{}}
-	)
+func GetUserVisits(id string, params map[string][]string) (Places, error) {
+	params["id"] = []string{id}
 
-	for i, name := range names {
-		if value, ok := predicates[name]; ok {
-			values = append(values, value[0])
-			where = append(where, fmt.Sprintf("%s$%d", statements[i], len(values)))
+	conditions := map[string]string{
+		"id":       `"user"=:id`,
+		"fromDate": "visited_at>:fromDate",
+		"toDate":   "visited_at<:toDate",
+		"country":  "country=:country",
+		"distance": "distance<:distance"}
+
+	where := []string{}
+	args := map[string]interface{}{}
+
+	for param, condition := range conditions {
+		if _, ok := params[param]; ok {
+			where = append(where, condition)
+			args[param] = params[param][0]
 		}
 	}
 
-	q := `SELECT mark, visited_at, place 
-		  FROM visits 
-		  INNER JOIN locations ON visits.location = locations.id
-		  WHERE ` + strings.Join(where, " AND ")
+	query := `SELECT mark, visited_at, place
+	FROM visits
+	INNER JOIN locations ON visits.location = locations.id
+	WHERE ` + strings.Join(where, " AND ")
 
-	err := DB.Select(&places.Rows, q, values...)
+	places := Places{[]*Place{}}
+	nstmt, err := DB.PrepareNamed(query)
+	if err != nil {
+		return places, err
+	}
+	err = nstmt.Select(&places.Rows, args)
 	return places, err
 }
 
