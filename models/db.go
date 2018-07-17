@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 
@@ -46,4 +47,24 @@ func GetByID(table string, id string, dest interface{}) error {
 	}
 
 	return nil
+}
+
+// Where contains data for SQL Where Clause.
+type Where struct {
+	Statement string
+	Args      map[string]interface{}
+}
+
+func prepareWhere(conditions map[string]string, params map[string][]string) Where {
+	where := []string{}
+	args := map[string]interface{}{}
+
+	for param, condition := range conditions {
+		if _, ok := params[param]; ok {
+			where = append(where, condition)
+			args[param] = params[param][0]
+		}
+	}
+
+	return Where{strings.Join(where, " AND "), args}
 }

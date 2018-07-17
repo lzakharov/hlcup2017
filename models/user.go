@@ -1,9 +1,5 @@
 package models
 
-import (
-	"strings"
-)
-
 const usersTableName = "users"
 
 // User contains information about user.
@@ -51,27 +47,19 @@ func GetUserVisits(id string, params map[string][]string) (Places, error) {
 		"country":  "country=:country",
 		"distance": "distance<:distance"}
 
-	where := []string{}
-	args := map[string]interface{}{}
-
-	for param, condition := range conditions {
-		if _, ok := params[param]; ok {
-			where = append(where, condition)
-			args[param] = params[param][0]
-		}
-	}
+	where := prepareWhere(conditions, params)
 
 	query := `SELECT mark, visited_at, place
 	FROM visits
 	INNER JOIN locations ON visits.location = locations.id
-	WHERE ` + strings.Join(where, " AND ")
+	WHERE ` + where.Statement
 
 	places := Places{[]*Place{}}
 	nstmt, err := DB.PrepareNamed(query)
 	if err != nil {
 		return places, err
 	}
-	err = nstmt.Select(&places.Rows, args)
+	err = nstmt.Select(&places.Rows, where.Args)
 	return places, err
 }
 

@@ -1,9 +1,5 @@
 package models
 
-import (
-	"strings"
-)
-
 const locationsTableName = "locations"
 
 // Location contains information about location.
@@ -45,28 +41,20 @@ func GetLocationAverageMark(id string, params map[string][]string) (LocationAvgM
 		"toAge":    age + "<:toAge",
 		"gender":   "users.gender=:gender"}
 
-	where := []string{}
-	args := map[string]interface{}{}
-
-	for param, condition := range conditions {
-		if _, ok := params[param]; ok {
-			where = append(where, condition)
-			args[param] = params[param][0]
-		}
-	}
+	where := prepareWhere(conditions, params)
 
 	query := `SELECT COALESCE("round"("avg"(visits.mark), 2), 0) as "avg" 
 	FROM locations 
 	JOIN visits ON visits.location = locations.id 
 	JOIN users ON users.id = visits."user" 
-	WHERE ` + strings.Join(where, " AND ")
+	WHERE ` + where.Statement
 
 	average := LocationAvgMark{}
 	nstmt, err := DB.PrepareNamed(query)
 	if err != nil {
 		return average, err
 	}
-	err = nstmt.Get(&average, args)
+	err = nstmt.Get(&average, where.Args)
 	return average, err
 }
 
