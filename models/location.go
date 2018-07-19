@@ -22,9 +22,9 @@ type LocationAvgMark struct {
 }
 
 // GetLocation returns location from database specified by id.
-func GetLocation(id string) (Location, error) {
-	location := Location{}
-	err := GetByID(locationsTableName, id, &location)
+func GetLocation(id string) (*Location, error) {
+	location := new(Location)
+	err := GetByID(locationsTableName, id, location)
 	return location, err
 }
 

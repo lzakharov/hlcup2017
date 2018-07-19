@@ -17,9 +17,9 @@ type Visits struct {
 }
 
 // GetVisit returns visit from database specified by id.
-func GetVisit(id string) (Visit, error) {
-	visit := Visit{}
-	err := GetByID(visitsTableName, id, &visit)
+func GetVisit(id string) (*Visit, error) {
+	visit := new(Visit)
+	err := GetByID(visitsTableName, id, visit)
 	return visit, err
 }
 

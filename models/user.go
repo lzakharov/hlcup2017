@@ -30,9 +30,9 @@ type Places struct {
 }
 
 // GetUser returns user from database specified by id.
-func GetUser(id string) (User, error) {
-	user := User{}
-	err := GetByID(usersTableName, id, &user)
+func GetUser(id string) (*User, error) {
+	user := new(User)
+	err := GetByID(usersTableName, id, user)
 	return user, err
 }
 

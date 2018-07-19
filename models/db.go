@@ -1,19 +1,20 @@
 package models
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"strings"
 
-	"github.com/jmoiron/sqlx"
-
 	// postgres driver
 	_ "github.com/lib/pq"
+
+	sq "github.com/Masterminds/squirrel"
+	"github.com/jmoiron/sqlx"
 )
 
 // DB contains connection to the database.
 var DB *sqlx.DB
+var psql sq.StatementBuilderType
 
 // InitDatabase enstablishes connection to the database.
 func InitDatabase(driverName string, dataSourceName string) {
@@ -26,6 +27,8 @@ func InitDatabase(driverName string, dataSourceName string) {
 	if err = DB.Ping(); err != nil {
 		log.Panic(err)
 	}
+
+	psql = sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 }
 
 // CreateSchema creates tables in database from schema file.
@@ -40,9 +43,14 @@ func CreateSchema(file string) {
 
 // GetByID retrieves specified by id model from database.
 func GetByID(table string, id string, dest interface{}) error {
-	q := fmt.Sprintf("SELECT * FROM %s WHERE id=$1", table)
+	sql, args, err := psql.Select("*").From(table).Where(sq.Eq{"id": id}).ToSql()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
 
-	if err := DB.Get(dest, q, id); err != nil {
+	if err := DB.Get(dest, sql, args...); err != nil {
+		log.Println(err)
 		return err
 	}
 
