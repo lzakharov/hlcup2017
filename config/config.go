@@ -10,17 +10,20 @@ import (
 type Configuration struct {
 	Host string `json:"host"`
 	Port int    `json:"port"`
-	DB   struct {
-		Driver   string `json:"driver"`
-		Host     string `json:"host"`
-		Port     int    `json:"port"`
-		User     string `json:"user"`
-		Password string `json:"password"`
-		Name     string `json:"name"`
-		SSLMode  string `json:"sslmode"`
-		Schema   string `json:"schema"`
-	} `json:"db"`
+	DB   *DB    `json:"db"`
 	Data string `json:"data"`
+}
+
+// DB represents database configuration data.
+type DB struct {
+	Driver   string `json:"driver"`
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	User     string `json:"user"`
+	Password string `json:"password"`
+	Name     string `json:"name"`
+	SSLMode  string `json:"sslmode"`
+	Schema   string `json:"schema"`
 }
 
 // LoadConfiguration returns project configuration loaded from the JSON file.
