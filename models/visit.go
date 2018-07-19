@@ -1,6 +1,10 @@
 package models
 
+import "log"
+
 const visitsTableName = "visits"
+
+var visitsTableColumns = []string{"id", "location", `"user"`, "visited_at", "mark"}
 
 // Visit contains full information about visit.
 type Visit struct {
@@ -25,14 +29,21 @@ func GetVisit(id string) (*Visit, error) {
 
 // InsertVisit inserts specified visit into database.
 func InsertVisit(visit *Visit) error {
-	_, err := DB.NamedExec(
-		`INSERT INTO visits (id, location, "user", visited_at, mark) 
-		 VALUES (:id, :location, :user, :visited_at, :mark)`, visit)
+	sql, args, err := psql.
+		Insert(visitsTableName).
+		Columns(visitsTableColumns...).
+		Values(visit.ID, visit.Location, visit.User, visit.VisitedAt, visit.Mark).
+		ToSql()
+
+	_, err = DB.Exec(sql, args...)
+	if err != nil {
+		log.Println(err)
+	}
 	return err
 }
 
 // PopulateVisits inserts specified list of Visits into database.
-func PopulateVisits(visits Visits) error {
+func PopulateVisits(visits *Visits) error {
 	for _, visit := range visits.Rows {
 		if err := InsertVisit(visit); err != nil {
 			return err

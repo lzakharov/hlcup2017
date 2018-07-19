@@ -1,6 +1,10 @@
 package models
 
+import "log"
+
 const usersTableName = "users"
+
+var usersTableColumns = []string{"id", "email", "first_name", "last_name", "gender", "birth_date"}
 
 // User contains information about user.
 type User struct {
@@ -65,13 +69,21 @@ func GetUserVisits(id string, params map[string][]string) (Places, error) {
 
 // InsertUser inserts specified user into database.
 func InsertUser(user *User) error {
-	_, err := DB.NamedExec(`INSERT INTO users (id, email, first_name, last_name, gender, birth_date) 
-	VALUES (:id, :email, :first_name, :last_name, :gender, :birth_date)`, user)
+	sql, args, err := psql.
+		Insert(usersTableName).
+		Columns(usersTableColumns...).
+		Values(user.ID, user.Email, user.FirstName, user.LastName, user.Gender, user.BirthDate).
+		ToSql()
+
+	_, err = DB.Exec(sql, args...)
+	if err != nil {
+		log.Println(err)
+	}
 	return err
 }
 
 // PopulateUsers inserts specified list of users into database.
-func PopulateUsers(users Users) error {
+func PopulateUsers(users *Users) error {
 	for _, user := range users.Rows {
 		if err := InsertUser(user); err != nil {
 			return err

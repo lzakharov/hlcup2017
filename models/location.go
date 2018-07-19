@@ -1,6 +1,10 @@
 package models
 
+import "log"
+
 const locationsTableName = "locations"
+
+var locationsTableColumns = []string{"id", "place", "country", "city", "distance"}
 
 // Location contains information about location.
 type Location struct {
@@ -60,14 +64,21 @@ func GetLocationAverageMark(id string, params map[string][]string) (LocationAvgM
 
 // InsertLocation inserts specified location into database.
 func InsertLocation(location *Location) error {
-	_, err := DB.NamedExec(
-		`INSERT INTO locations (id, place, country, city, distance) 
-		 VALUES (:id, :place, :country, :city, :distance)`, location)
+	sql, args, err := psql.
+		Insert(locationsTableName).
+		Columns(locationsTableColumns...).
+		Values(location.ID, location.Place, location.Country, location.City, location.Distance).
+		ToSql()
+
+	_, err = DB.Exec(sql, args...)
+	if err != nil {
+		log.Println(err)
+	}
 	return err
 }
 
 // PopulateLocations inserts specified list of locations into database.
-func PopulateLocations(locations Locations) error {
+func PopulateLocations(locations *Locations) error {
 	for _, location := range locations.Rows {
 		if err := InsertLocation(location); err != nil {
 			return err

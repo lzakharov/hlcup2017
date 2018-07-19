@@ -52,7 +52,7 @@ func LoadData(archive string) error {
 
 		switch entity {
 		case "users":
-			var users models.Users
+			users := new(models.Users)
 			if err := parse(reader, &users); err != nil {
 				log.Panic(err)
 			}
@@ -60,7 +60,7 @@ func LoadData(archive string) error {
 				log.Panic(err)
 			}
 		case "locations":
-			var locations models.Locations
+			locations := new(models.Locations)
 			if err := parse(reader, &locations); err != nil {
 				log.Panic(err)
 			}
@@ -68,7 +68,7 @@ func LoadData(archive string) error {
 				log.Panic(err)
 			}
 		case "visits":
-			var visits models.Visits
+			visits := new(models.Visits)
 			if err := parse(reader, &visits); err != nil {
 				log.Panic(err)
 			}
