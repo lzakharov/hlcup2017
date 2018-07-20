@@ -77,18 +77,18 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := vars["id"]
 
-	params := make(map[string]interface{})
-	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
+	user := new(models.User)
+	if err := json.NewDecoder(r.Body).Decode(user); err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	params["id"] = id
 
-	if err := models.UpdateUser(params); err != nil {
+	if err := models.UpdateUser(id, user); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{})
+	json.NewEncoder(w).Encode(EmptyJSON)
 }

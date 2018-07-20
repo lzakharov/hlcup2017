@@ -1,6 +1,10 @@
 package models
 
-import "log"
+import (
+	"log"
+
+	sq "github.com/Masterminds/squirrel"
+)
 
 const visitsTableName = "visits"
 
@@ -8,11 +12,11 @@ var visitsTableColumns = []string{"id", "location", `"user"`, "visited_at", "mar
 
 // Visit contains full information about visit.
 type Visit struct {
-	ID        uint32 `json:"id" db:"id"`
-	Location  uint32 `json:"location" db:"location"`
-	User      uint32 `json:"user" db:"user"`
-	VisitedAt int32  `json:"visited_at" db:"visited_at"`
-	Mark      uint8  `json:"mark" db:"mark"`
+	ID        *uint32 `json:"id" db:"id"`
+	Location  *uint32 `json:"location" db:"location"`
+	User      *uint32 `json:"user" db:"user"`
+	VisitedAt *int32  `json:"visited_at" db:"visited_at"`
+	Mark      *uint8  `json:"mark" db:"mark"`
 }
 
 // Visits contains list of visits.
@@ -53,8 +57,30 @@ func PopulateVisits(visits *Visits) error {
 }
 
 // UpdateVisit updates specified visit's row in database.
-func UpdateVisit(params map[string]interface{}) error {
-	query := prepareUpdate(usersTableName, []string{"location", `"user"`, "visited_at", "mark"}, params)
-	_, err := DB.NamedExec(query, params)
+func UpdateVisit(id string, visit *Visit) error {
+	update := psql.Update(visitsTableName)
+
+	if visit.Location != nil {
+		update = update.Set("location", visit.Location)
+	}
+	if visit.User != nil {
+		update = update.Set(`"user"`, visit.User)
+	}
+	if visit.VisitedAt != nil {
+		update = update.Set("visited_at", visit.VisitedAt)
+	}
+	if visit.Mark != nil {
+		update = update.Set("mark", visit.Mark)
+	}
+
+	update = update.Where(sq.Eq{"id": id})
+
+	sql, args, err := update.ToSql()
+
+	_, err = DB.Exec(sql, args...)
+	if err != nil {
+		log.Println(err)
+	}
+
 	return err
 }

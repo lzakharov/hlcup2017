@@ -3,7 +3,6 @@ package models
 import (
 	"io/ioutil"
 	"log"
-	"strings"
 
 	// postgres driver
 	_ "github.com/lib/pq"
@@ -55,15 +54,4 @@ func GetByID(table string, id string, dest interface{}) error {
 	}
 
 	return nil
-}
-
-func prepareUpdate(table string, columns []string, params map[string]interface{}) string {
-	statement := []string{}
-	for _, col := range columns {
-		if _, ok := params[col]; ok {
-			statement = append(statement, col+"=:"+col)
-		}
-	}
-	query := "UPDATE " + table + " SET " + strings.Join(statement, ", ") + " WHERE id=:id"
-	return query
 }

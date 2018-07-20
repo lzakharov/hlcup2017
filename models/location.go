@@ -13,11 +13,11 @@ var locationsTableColumns = []string{"id", "place", "country", "city", "distance
 
 // Location contains information about location.
 type Location struct {
-	ID       uint32 `json:"id" db:"id"`
-	Place    string `json:"place" db:"place"`
-	Country  string `json:"country" db:"country"`
-	City     string `json:"city" db:"city"`
-	Distance uint32 `json:"distance" db:"distance"`
+	ID       *uint32 `json:"id" db:"id"`
+	Place    *string `json:"place" db:"place"`
+	Country  *string `json:"country" db:"country"`
+	City     *string `json:"city" db:"city"`
+	Distance *uint32 `json:"distance" db:"distance"`
 }
 
 // Locations contains list of locations.
@@ -56,18 +56,18 @@ func GetLocationAverageMark(id string, filter *LocationFilter) (*LocationAvgMark
 		Where(sq.Eq{locationsTableName + ".id": id})
 
 	if filter.FromDate != nil {
-		locations = locations.Where(sq.Gt{"visits.visited_at": *filter.FromDate})
+		locations = locations.Where(sq.Gt{"visits.visited_at": filter.FromDate})
 	}
 	if filter.ToDate != nil {
-		locations = locations.Where(sq.Lt{"visits.visited_at": *filter.ToDate})
+		locations = locations.Where(sq.Lt{"visits.visited_at": filter.ToDate})
 	}
 
 	const age = "date_part('year', age(to_timestamp(users.birth_date)))"
 	if filter.FromAge != nil {
-		locations = locations.Where(sq.Gt{age: *filter.FromAge})
+		locations = locations.Where(sq.Gt{age: filter.FromAge})
 	}
 	if filter.ToAge != nil {
-		locations = locations.Where(sq.Lt{age: *filter.ToAge})
+		locations = locations.Where(sq.Lt{age: filter.ToAge})
 	}
 
 	if filter.Gender != nil {
@@ -115,8 +115,30 @@ func PopulateLocations(locations *Locations) error {
 }
 
 // UpdateLocation updates specified location's row in database.
-func UpdateLocation(params map[string]interface{}) error {
-	query := prepareUpdate(usersTableName, []string{"place", "country", "city", "distance"}, params)
-	_, err := DB.NamedExec(query, params)
+func UpdateLocation(id string, location *Location) error {
+	update := psql.Update(locationsTableName)
+
+	if location.Place != nil {
+		update = update.Set("place", location.Place)
+	}
+	if location.Country != nil {
+		update = update.Set("country", location.Country)
+	}
+	if location.City != nil {
+		update = update.Set("city", location.City)
+	}
+	if location.Distance != nil {
+		update = update.Set("distance", location.Distance)
+	}
+
+	update = update.Where(sq.Eq{"id": id})
+
+	sql, args, err := update.ToSql()
+
+	_, err = DB.Exec(sql, args...)
+	if err != nil {
+		log.Println(err)
+	}
+
 	return err
 }

@@ -13,12 +13,12 @@ var usersTableColumns = []string{"id", "email", "first_name", "last_name", "gend
 
 // User contains information about user.
 type User struct {
-	ID        uint32 `json:"id" db:"id"`
-	Email     string `json:"email" db:"email"`
-	FirstName string `json:"first_name" db:"first_name"`
-	LastName  string `json:"last_name" db:"last_name"`
-	Gender    string `json:"gender" db:"gender"`
-	BirthDate int32  `json:"birth_date" db:"birth_date"`
+	ID        *uint32 `json:"id" db:"id"`
+	Email     *string `json:"email" db:"email"`
+	FirstName *string `json:"first_name" db:"first_name"`
+	LastName  *string `json:"last_name" db:"last_name"`
+	Gender    *string `json:"gender" db:"gender"`
+	BirthDate *int32  `json:"birth_date" db:"birth_date"`
 }
 
 // Users contains list of users.
@@ -62,17 +62,17 @@ func GetUserVisits(id string, filter *PlaceFilter) (*Places, error) {
 		Where(sq.Eq{`"user"`: id})
 
 	if filter.FromDate != nil {
-		places = places.Where(sq.Gt{"visited_at": *filter.FromDate})
+		places = places.Where(sq.Gt{"visited_at": filter.FromDate})
 	}
 	if filter.ToDate != nil {
-		places = places.Where(sq.Lt{"visited_at": *filter.ToDate})
+		places = places.Where(sq.Lt{"visited_at": filter.ToDate})
 	}
 
 	if filter.Country != nil {
-		places = places.Where(sq.Eq{"country": *filter.Country})
+		places = places.Where(sq.Eq{"country": filter.Country})
 	}
 	if filter.Distance != nil {
-		places = places.Where(sq.Lt{"distance": *filter.Distance})
+		places = places.Where(sq.Lt{"distance": filter.Distance})
 	}
 
 	sql, args, err := places.ToSql()
@@ -116,9 +116,33 @@ func PopulateUsers(users *Users) error {
 }
 
 // UpdateUser updates specified user's row in database.
-func UpdateUser(params map[string]interface{}) error {
-	query := prepareUpdate(usersTableName,
-		[]string{"email", "first_name", "last_name", "gender", "birth_date"}, params)
-	_, err := DB.NamedExec(query, params)
+func UpdateUser(id string, user *User) error {
+	update := psql.Update(usersTableName)
+
+	if user.Email != nil {
+		update = update.Set("email", user.Email)
+	}
+	if user.FirstName != nil {
+		update = update.Set("first_name", user.FirstName)
+	}
+	if user.LastName != nil {
+		update = update.Set("last_name", user.LastName)
+	}
+	if user.Gender != nil {
+		update = update.Set("gender", user.Gender)
+	}
+	if user.BirthDate != nil {
+		update = update.Set("birth_date", user.BirthDate)
+	}
+
+	update = update.Where(sq.Eq{"id": id})
+
+	sql, args, err := update.ToSql()
+
+	_, err = DB.Exec(sql, args...)
+	if err != nil {
+		log.Println(err)
+	}
+
 	return err
 }

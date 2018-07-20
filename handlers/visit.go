@@ -50,18 +50,18 @@ func UpdateVisit(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := vars["id"]
 
-	params := make(map[string]interface{})
-	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
+	visit := new(models.Visit)
+	if err := json.NewDecoder(r.Body).Decode(visit); err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	params["id"] = id
 
-	if err := models.UpdateVisit(params); err != nil {
+	if err := models.UpdateVisit(id, visit); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{})
+	json.NewEncoder(w).Encode(EmptyJSON)
 }
