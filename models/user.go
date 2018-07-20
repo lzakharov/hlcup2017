@@ -1,6 +1,10 @@
 package models
 
-import "log"
+import (
+	"log"
+
+	sq "github.com/Masterminds/squirrel"
+)
 
 const usersTableName = "users"
 
@@ -33,6 +37,14 @@ type Places struct {
 	Rows []*Place `json:"visits"`
 }
 
+// PlaceFilter contains filtering parameters for visited places.
+type PlaceFilter struct {
+	FromDate *int32  `schema:"fromDate"`
+	ToDate   *int32  `schema:"toDate"`
+	Country  *string `schema:"country"`
+	Distance *uint32 `schema:"distance"`
+}
+
 // GetUser returns user from database specified by id.
 func GetUser(id string) (*User, error) {
 	user := new(User)
@@ -41,30 +53,39 @@ func GetUser(id string) (*User, error) {
 }
 
 // GetUserVisits returns user's visits from database specified by user's id.
-func GetUserVisits(id string, params map[string][]string) (Places, error) {
-	params["id"] = []string{id}
+func GetUserVisits(id string, filter *PlaceFilter) (*Places, error) {
+	places := psql.
+		Select("mark", "visited_at", "place").
+		From(visitsTableName).
+		Join(locationsTableName + " ON visits.location = locations.id").
+		Where(sq.Eq{`"user"`: id})
 
-	conditions := map[string]string{
-		"id":       `"user"=:id`,
-		"fromDate": "visited_at>:fromDate",
-		"toDate":   "visited_at<:toDate",
-		"country":  "country=:country",
-		"distance": "distance<:distance"}
-
-	where := prepareWhere(conditions, params)
-
-	query := `SELECT mark, visited_at, place
-	FROM visits
-	INNER JOIN locations ON visits.location=locations.id
-	WHERE ` + where.Statement
-
-	places := Places{[]*Place{}}
-	nstmt, err := DB.PrepareNamed(query)
-	if err != nil {
-		return places, err
+	if filter.FromDate != nil {
+		places = places.Where(sq.Gt{"visited_at": *filter.FromDate})
 	}
-	err = nstmt.Select(&places.Rows, where.Args)
-	return places, err
+	if filter.ToDate != nil {
+		places = places.Where(sq.Lt{"visited_at": *filter.ToDate})
+	}
+	if filter.Country != nil {
+		places = places.Where(sq.Eq{"country": *filter.Country})
+	}
+	if filter.Distance != nil {
+		places = places.Where(sq.Lt{"distance": *filter.Distance})
+	}
+
+	sql, args, err := places.ToSql()
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	result := &Places{[]*Place{}}
+	if err := DB.Select(&result.Rows, sql, args...); err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // InsertUser inserts specified user into database.
