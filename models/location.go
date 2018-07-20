@@ -1,6 +1,11 @@
 package models
 
-import "log"
+import (
+	"fmt"
+	"log"
+
+	sq "github.com/Masterminds/squirrel"
+)
 
 const locationsTableName = "locations"
 
@@ -20,6 +25,15 @@ type Locations struct {
 	Rows []*Location `json:"locations"`
 }
 
+// LocationFilter contains filtering parameters for locations.
+type LocationFilter struct {
+	FromDate *int32  `schema:"fromDate"`
+	ToDate   *int32  `schema:"toDate"`
+	FromAge  *int32  `schema:"fromAge"`
+	ToAge    *int32  `schema:"toAge"`
+	Gender   *string `schema:"gender"`
+}
+
 // LocationAvgMark contains location average mark.
 type LocationAvgMark struct {
 	Avg float64 `json:"avg" db:"avg"`
@@ -33,32 +47,45 @@ func GetLocation(id string) (*Location, error) {
 }
 
 // GetLocationAverageMark returns average mark for specified location.
-func GetLocationAverageMark(id string, params map[string][]string) (LocationAvgMark, error) {
-	const age = "date_part('year', age(to_timestamp(users.birth_date)))"
-	params["id"] = []string{id}
+func GetLocationAverageMark(id string, filter *LocationFilter) (*LocationAvgMark, error) {
+	locations := psql.
+		Select(`COALESCE("round"("avg"(visits.mark), 2), 0) AS "avg"`).
+		From(locationsTableName).
+		Join(fmt.Sprintf("%s ON %s.id = %s.location", visitsTableName, locationsTableName, visitsTableName)).
+		Join(fmt.Sprintf(`%s ON %s."user" = %s.id`, usersTableName, visitsTableName, usersTableName)).
+		Where(sq.Eq{locationsTableName + ".id": id})
 
-	conditions := map[string]string{
-		"id":       `locations.id=:id`,
-		"fromDate": "visits.visited_at>:fromDate",
-		"toDate":   "visits.visited_at<:toDate",
-		"fromAge":  age + ">:fromAge",
-		"toAge":    age + "<:toAge",
-		"gender":   "users.gender=:gender"}
-
-	where := prepareWhere(conditions, params)
-
-	query := `SELECT COALESCE("round"("avg"(visits.mark), 2), 0) as "avg" 
-	FROM locations 
-	JOIN visits ON visits.location = locations.id 
-	JOIN users ON users.id = visits."user" 
-	WHERE ` + where.Statement
-
-	average := LocationAvgMark{}
-	nstmt, err := DB.PrepareNamed(query)
-	if err != nil {
-		return average, err
+	if filter.FromDate != nil {
+		locations = locations.Where(sq.Gt{"visits.visited_at": *filter.FromDate})
 	}
-	err = nstmt.Get(&average, where.Args)
+	if filter.ToDate != nil {
+		locations = locations.Where(sq.Lt{"visits.visited_at": *filter.ToDate})
+	}
+
+	const age = "date_part('year', age(to_timestamp(users.birth_date)))"
+	if filter.FromAge != nil {
+		locations = locations.Where(sq.Gt{age: *filter.FromAge})
+	}
+	if filter.ToAge != nil {
+		locations = locations.Where(sq.Lt{age: *filter.ToAge})
+	}
+
+	if filter.Gender != nil {
+		locations = locations.Where(sq.Eq{"users.gender": filter.Gender})
+	}
+
+	sql, args, err := locations.ToSql()
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	average := &LocationAvgMark{}
+	if err := DB.Get(average, sql, args...); err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
 	return average, err
 }
 

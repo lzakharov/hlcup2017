@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/schema"
 	"github.com/lzakharov/hlcup2017/models"
 )
 
@@ -33,7 +34,15 @@ func GetLocationAverageMark(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := vars["id"]
 
-	avg, err := models.GetLocationAverageMark(id, r.URL.Query())
+	filter := new(models.LocationFilter)
+	decoder := schema.NewDecoder()
+	if err := decoder.Decode(filter, r.URL.Query()); err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	avg, err := models.GetLocationAverageMark(id, filter)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

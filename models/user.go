@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"log"
 
 	sq "github.com/Masterminds/squirrel"
@@ -57,7 +58,7 @@ func GetUserVisits(id string, filter *PlaceFilter) (*Places, error) {
 	places := psql.
 		Select("mark", "visited_at", "place").
 		From(visitsTableName).
-		Join(locationsTableName + " ON visits.location = locations.id").
+		Join(fmt.Sprintf("%s ON %s.location = %s.id", locationsTableName, visitsTableName, locationsTableName)).
 		Where(sq.Eq{`"user"`: id})
 
 	if filter.FromDate != nil {
@@ -66,6 +67,7 @@ func GetUserVisits(id string, filter *PlaceFilter) (*Places, error) {
 	if filter.ToDate != nil {
 		places = places.Where(sq.Lt{"visited_at": *filter.ToDate})
 	}
+
 	if filter.Country != nil {
 		places = places.Where(sq.Eq{"country": *filter.Country})
 	}
