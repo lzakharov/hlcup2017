@@ -28,7 +28,6 @@ func LoadData(archive string) error {
 			if err != nil {
 				log.Panic(err)
 			}
-			defer f.Close()
 
 			bytes, err := ioutil.ReadAll(f)
 			if err != nil {
@@ -39,6 +38,7 @@ func LoadData(archive string) error {
 			tm, test := options[0], options[1]
 			log.Println("Data generation timestamp", tm, "with type", test)
 
+			f.Close()
 			continue
 		}
 
@@ -48,7 +48,6 @@ func LoadData(archive string) error {
 		if err != nil {
 			log.Panic(err)
 		}
-		defer reader.Close()
 
 		switch entity {
 		case "users":
@@ -76,6 +75,8 @@ func LoadData(archive string) error {
 				log.Panic(err)
 			}
 		}
+
+		reader.Close()
 	}
 
 	log.Println("Loaded data from", archive)
