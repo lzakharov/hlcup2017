@@ -12,8 +12,11 @@ import (
 	"github.com/lzakharov/hlcup2017/utils"
 )
 
-func DumbHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello, I'm Web Server!"))
+func DumbHandler(w http.ResponseWriter, _ *http.Request) {
+	_, err := w.Write([]byte("Hello, I'm Web Server!"))
+	if err != nil {
+		log.Panic(err)
+	}
 }
 
 func main() {
