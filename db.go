@@ -14,6 +14,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+// Database contains database connection and query builder.
 type Database struct {
 	Socket           *sqlx.DB
 	StatementBuilder sq.StatementBuilderType
@@ -33,6 +34,8 @@ var (
 	visitsTableColumns    = []string{"id", "location", `"user"`, "visited_at", "mark"}
 )
 
+// Initialize database with specified configuration.
+// Tries to connect to the database every reconnectionTime until connectionTimeout.
 func (d *Database) Initialize(c *DBConfig) error {
 	var err error
 	timer := time.NewTimer(time.Duration(connectionTimeout) * time.Second)
@@ -40,7 +43,7 @@ func (d *Database) Initialize(c *DBConfig) error {
 
 	go func() {
 		for {
-			if d.Socket, err = sqlx.Connect(c.Driver, c.GetDataSourceName()); err == nil {
+			if d.Socket, err = sqlx.Connect(c.Driver, c.GetDSN()); err == nil {
 				connected <- struct{}{}
 			}
 			log.Println("Database connection failed")
@@ -84,12 +87,14 @@ func (d *Database) getByID(table string, id string, dest interface{}) error {
 	return nil
 }
 
+// GetUser returns user specified by id from database.
 func (d *Database) GetUser(id string) (*User, error) {
 	user := new(User)
 	err := d.getByID(usersTableName, id, user)
 	return user, err
 }
 
+// GetUserVisits returns user's visits specified by user id from database.
 func (d *Database) GetUserVisits(id string, filter *PlaceFilter) (*Places, error) {
 	places := d.StatementBuilder.
 		Select("mark", "visited_at", "place").
@@ -126,6 +131,7 @@ func (d *Database) GetUserVisits(id string, filter *PlaceFilter) (*Places, error
 	return result, nil
 }
 
+// InsertUser inserts specified user into database.
 func (d *Database) InsertUser(user *User) error {
 	sql, args, err := d.StatementBuilder.
 		Insert(usersTableName).
@@ -140,6 +146,7 @@ func (d *Database) InsertUser(user *User) error {
 	return err
 }
 
+// PopulateUsers inserts specified list of users into database.
 func (d *Database) PopulateUsers(users *Users) error {
 	for _, user := range users.Rows {
 		if err := d.InsertUser(user); err != nil {
@@ -149,6 +156,7 @@ func (d *Database) PopulateUsers(users *Users) error {
 	return nil
 }
 
+// UpdateUser updates specified user's row in database.
 func (d *Database) UpdateUser(id string, user *User) error {
 	update := d.StatementBuilder.Update(usersTableName)
 
@@ -179,12 +187,14 @@ func (d *Database) UpdateUser(id string, user *User) error {
 	return err
 }
 
+// GetLocation returns location specified by id from database.
 func (d *Database) GetLocation(id string) (*Location, error) {
 	location := new(Location)
 	err := d.getByID(locationsTableName, id, location)
 	return location, err
 }
 
+// GetLocationAverageMark returns average mark for location specified by id.
 func (d *Database) GetLocationAverageMark(id string, filter *LocationFilter) (*LocationAvgMark, error) {
 	const age = "date_part('year', age(to_timestamp(users.birth_date)))"
 
@@ -228,6 +238,7 @@ func (d *Database) GetLocationAverageMark(id string, filter *LocationFilter) (*L
 	return average, err
 }
 
+// InsertLocation inserts specified location into database.
 func (d *Database) InsertLocation(location *Location) error {
 	sql, args, err := d.StatementBuilder.
 		Insert(locationsTableName).
@@ -242,6 +253,7 @@ func (d *Database) InsertLocation(location *Location) error {
 	return err
 }
 
+// PopulateLocations inserts specified list of locations into database.
 func (d *Database) PopulateLocations(locations *Locations) error {
 	for _, location := range locations.Rows {
 		if err := d.InsertLocation(location); err != nil {
@@ -251,6 +263,7 @@ func (d *Database) PopulateLocations(locations *Locations) error {
 	return nil
 }
 
+// UpdateLocation updates specified location's row in database.
 func (d *Database) UpdateLocation(id string, location *Location) error {
 	update := d.StatementBuilder.Update(locationsTableName)
 
@@ -278,12 +291,14 @@ func (d *Database) UpdateLocation(id string, location *Location) error {
 	return err
 }
 
+// GetVisit returns visit specified by id from database.
 func (d *Database) GetVisit(id string) (*Visit, error) {
 	visit := new(Visit)
 	err := d.getByID(visitsTableName, id, visit)
 	return visit, err
 }
 
+// InsertVisit inserts specified visit into database.
 func (d *Database) InsertVisit(visit *Visit) error {
 	sql, args, err := d.StatementBuilder.
 		Insert(visitsTableName).
@@ -298,6 +313,7 @@ func (d *Database) InsertVisit(visit *Visit) error {
 	return err
 }
 
+// PopulateVisits inserts specified list of visits into database.
 func (d *Database) PopulateVisits(visits *Visits) error {
 	for _, visit := range visits.Rows {
 		if err := d.InsertVisit(visit); err != nil {
@@ -307,6 +323,7 @@ func (d *Database) PopulateVisits(visits *Visits) error {
 	return nil
 }
 
+// UpdateVisit updates specified visit's row in database.
 func (d *Database) UpdateVisit(id string, visit *Visit) error {
 	update := d.StatementBuilder.Update(visitsTableName)
 

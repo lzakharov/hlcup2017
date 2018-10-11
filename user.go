@@ -1,5 +1,6 @@
 package main
 
+// User contains user database record.
 type User struct {
 	ID        *uint32 `json:"id" db:"id"`
 	Email     *string `json:"email" db:"email"`
@@ -9,6 +10,7 @@ type User struct {
 	BirthDate *int32  `json:"birth_date" db:"birth_date"`
 }
 
+// Users contains slice of users.
 type Users struct {
 	Rows []*User `json:"users"`
 }

@@ -1,5 +1,6 @@
 package main
 
+// Visit contains visit database record.
 type Visit struct {
 	ID        *uint32 `json:"id" db:"id"`
 	Location  *uint32 `json:"location" db:"location"`
@@ -8,6 +9,7 @@ type Visit struct {
 	Mark      *uint8  `json:"mark" db:"mark"`
 }
 
+// Visits contains slice of visits.
 type Visits struct {
 	Rows []*Visit `json:"visits"`
 }

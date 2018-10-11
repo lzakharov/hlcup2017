@@ -7,6 +7,7 @@ import (
 	"os"
 )
 
+// Config contains server properties.
 type Config struct {
 	Host     string    `json:"host"`
 	Port     int       `json:"port"`
@@ -14,6 +15,7 @@ type Config struct {
 	Data     string    `json:"data"`
 }
 
+// DBConfig contains server database properties.
 type DBConfig struct {
 	Driver   string `json:"driver"`
 	Host     string `json:"host"`
@@ -25,6 +27,7 @@ type DBConfig struct {
 	Schema   string `json:"schema"`
 }
 
+// ConfigurationLoad returns server configurations parsed from the specified file.
 func ConfigurationLoad(file string) *Config {
 	config := new(Config)
 
@@ -42,11 +45,13 @@ func ConfigurationLoad(file string) *Config {
 	return config
 }
 
-func (d *DBConfig) GetDataSourceName() string {
+// GetDSN returns database source name.
+func (d *DBConfig) GetDSN() string {
 	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 		d.Host, d.Port, d.User, d.Password, d.Name, d.SSLMode)
 }
 
+// GetAddr returns sever address.
 func (c *Config) GetAddr() string {
 	return fmt.Sprintf("%s:%d", c.Host, c.Port)
 }

@@ -10,11 +10,13 @@ import (
 
 var emptyJSON = map[string]string{}
 
+// App contains server router and database configuration.
 type App struct {
 	Router   *mux.Router
 	Database *Database
 }
 
+// Initialize the server with specified configurations.
 func (a *App) Initialize(c *Config) error {
 	a.Database = new(Database)
 	if err := a.Database.Initialize(c.DBConfig); err != nil {
@@ -46,6 +48,7 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/visits/new", a.createVisit).Methods("POST")
 }
 
+// Run the server on specified address.
 func (a *App) Run(addr string) {
 	log.Fatal(http.ListenAndServe(addr, a.Router))
 }
