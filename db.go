@@ -1,9 +1,11 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"time"
 
 	// postgres driver
 	_ "github.com/lib/pq"
@@ -18,6 +20,8 @@ type Database struct {
 }
 
 const (
+	connectionTimeout  = 30
+	reconnectionTime   = 3
 	usersTableName     = "users"
 	locationsTableName = "locations"
 	visitsTableName    = "visits"
@@ -31,8 +35,24 @@ var (
 
 func (d *Database) Initialize(c *DBConfig) error {
 	var err error
-	if d.Socket, err = sqlx.Connect(c.Driver, c.GetDataSourceName()); err != nil {
-		return err
+	timer := time.NewTimer(time.Duration(connectionTimeout) * time.Second)
+	connected := make(chan struct{})
+
+	go func() {
+		for {
+			if d.Socket, err = sqlx.Connect(c.Driver, c.GetDataSourceName()); err == nil {
+				connected <- struct{}{}
+			}
+			log.Println("Database connection failed")
+			time.Sleep(reconnectionTime * time.Second)
+		}
+	}()
+	select {
+	case <-timer.C:
+		return errors.New("database connection timeout")
+	case <-connected:
+		timer.Stop()
+		log.Println("Database connected")
 	}
 	d.StatementBuilder = sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 
@@ -201,7 +221,7 @@ func (d *Database) GetLocationAverageMark(id string, filter *LocationFilter) (*L
 	}
 
 	average := &LocationAvgMark{}
-	if err := d.Socket.Get(average, sql, args...); err != nil {
+	if err = d.Socket.Get(average, sql, args...); err != nil {
 		log.Println(err)
 		return nil, err
 	}
