@@ -56,6 +56,7 @@ func (a *App) getUser(w http.ResponseWriter, r *http.Request) {
 
 	user, err := a.Database.GetUser(id)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
@@ -82,12 +83,14 @@ func (a *App) getUserVisits(w http.ResponseWriter, r *http.Request) {
 
 	places, err := a.Database.GetUserVisits(id, filter)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(places); err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -96,17 +99,20 @@ func (a *App) getUserVisits(w http.ResponseWriter, r *http.Request) {
 func (a *App) createUser(w http.ResponseWriter, r *http.Request) {
 	user := new(User)
 	if err := json.NewDecoder(r.Body).Decode(user); err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	if err := a.Database.InsertUser(user); err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(emptyJSON); err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -124,12 +130,14 @@ func (a *App) updateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := a.Database.UpdateUser(id, user); err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(emptyJSON); err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -141,6 +149,7 @@ func (a *App) getLocation(w http.ResponseWriter, r *http.Request) {
 
 	location, err := a.Database.GetLocation(id)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
@@ -167,12 +176,14 @@ func (a *App) getLocationAverageMark(w http.ResponseWriter, r *http.Request) {
 
 	avg, err := a.Database.GetLocationAverageMark(id, filter)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(avg); err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -181,17 +192,20 @@ func (a *App) getLocationAverageMark(w http.ResponseWriter, r *http.Request) {
 func (a *App) createLocation(w http.ResponseWriter, r *http.Request) {
 	location := new(Location)
 	if err := json.NewDecoder(r.Body).Decode(location); err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	if err := a.Database.InsertLocation(location); err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(emptyJSON); err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -209,12 +223,14 @@ func (a *App) updateLocation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := a.Database.UpdateLocation(id, location); err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(emptyJSON); err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -226,6 +242,7 @@ func (a *App) getVisit(w http.ResponseWriter, r *http.Request) {
 
 	visit, err := a.Database.GetVisit(id)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
@@ -241,17 +258,20 @@ func (a *App) getVisit(w http.ResponseWriter, r *http.Request) {
 func (a *App) createVisit(w http.ResponseWriter, r *http.Request) {
 	visit := new(Visit)
 	if err := json.NewDecoder(r.Body).Decode(visit); err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	if err := a.Database.InsertVisit(visit); err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(emptyJSON); err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -269,12 +289,14 @@ func (a *App) updateVisit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := a.Database.UpdateVisit(id, visit); err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(emptyJSON); err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
