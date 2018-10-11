@@ -30,12 +30,14 @@ func ConfigurationLoad(file string) *Config {
 
 	r, err := os.Open(file)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 	defer r.Close()
 
 	dec := json.NewDecoder(r)
-	dec.Decode(config)
+	if err := dec.Decode(config); err != nil {
+		log.Panic(err)
+	}
 
 	return config
 }

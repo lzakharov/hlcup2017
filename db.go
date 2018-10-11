@@ -132,11 +132,11 @@ func (d *Database) InsertUser(user *User) error {
 		Columns(usersTableColumns...).
 		Values(user.ID, user.Email, user.FirstName, user.LastName, user.Gender, user.BirthDate).
 		ToSql()
+	if err != nil {
+		return err
+	}
 
 	_, err = d.Socket.Exec(sql, args...)
-	if err != nil {
-		log.Println(err)
-	}
 	return err
 }
 
@@ -171,12 +171,11 @@ func (d *Database) UpdateUser(id string, user *User) error {
 	update = update.Where(sq.Eq{"id": id})
 
 	sql, args, err := update.ToSql()
-
-	_, err = d.Socket.Exec(sql, args...)
 	if err != nil {
-		log.Println(err)
+		return err
 	}
 
+	_, err = d.Socket.Exec(sql, args...)
 	return err
 }
 
@@ -235,11 +234,11 @@ func (d *Database) InsertLocation(location *Location) error {
 		Columns(locationsTableColumns...).
 		Values(location.ID, location.Place, location.Country, location.City, location.Distance).
 		ToSql()
+	if err != nil {
+		return err
+	}
 
 	_, err = d.Socket.Exec(sql, args...)
-	if err != nil {
-		log.Println(err)
-	}
 	return err
 }
 
@@ -271,12 +270,11 @@ func (d *Database) UpdateLocation(id string, location *Location) error {
 	update = update.Where(sq.Eq{"id": id})
 
 	sql, args, err := update.ToSql()
-
-	_, err = d.Socket.Exec(sql, args...)
 	if err != nil {
-		log.Println(err)
+		return err
 	}
 
+	_, err = d.Socket.Exec(sql, args...)
 	return err
 }
 
@@ -292,11 +290,11 @@ func (d *Database) InsertVisit(visit *Visit) error {
 		Columns(visitsTableColumns...).
 		Values(visit.ID, visit.Location, visit.User, visit.VisitedAt, visit.Mark).
 		ToSql()
+	if err != nil {
+		return err
+	}
 
 	_, err = d.Socket.Exec(sql, args...)
-	if err != nil {
-		log.Println(err)
-	}
 	return err
 }
 
@@ -328,11 +326,10 @@ func (d *Database) UpdateVisit(id string, visit *Visit) error {
 	update = update.Where(sq.Eq{"id": id})
 
 	sql, args, err := update.ToSql()
-
-	_, err = d.Socket.Exec(sql, args...)
 	if err != nil {
-		log.Println(err)
+		return err
 	}
 
+	_, err = d.Socket.Exec(sql, args...)
 	return err
 }
