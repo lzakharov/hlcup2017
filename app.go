@@ -106,7 +106,10 @@ func (a *App) createUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{})
+	if err := json.NewEncoder(w).Encode(emptyJSON); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func (a *App) updateUser(w http.ResponseWriter, r *http.Request) {
@@ -126,7 +129,10 @@ func (a *App) updateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(emptyJSON)
+	if err := json.NewEncoder(w).Encode(emptyJSON); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func (a *App) getLocation(w http.ResponseWriter, r *http.Request) {
@@ -185,7 +191,10 @@ func (a *App) createLocation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{})
+	if err := json.NewEncoder(w).Encode(emptyJSON); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func (a *App) updateLocation(w http.ResponseWriter, r *http.Request) {
@@ -205,7 +214,10 @@ func (a *App) updateLocation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(emptyJSON)
+	if err := json.NewEncoder(w).Encode(emptyJSON); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func (a *App) getVisit(w http.ResponseWriter, r *http.Request) {
@@ -239,7 +251,10 @@ func (a *App) createVisit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{})
+	if err := json.NewEncoder(w).Encode(emptyJSON); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func (a *App) updateVisit(w http.ResponseWriter, r *http.Request) {
@@ -259,5 +274,8 @@ func (a *App) updateVisit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(emptyJSON)
+	if err := json.NewEncoder(w).Encode(emptyJSON); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
