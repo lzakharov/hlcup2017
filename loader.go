@@ -9,15 +9,16 @@ import (
 	"strings"
 )
 
+// LoadData loads users, locations and visits from the specified archive to the database.
 func LoadData(archive string, d *Database) error {
 	log.Println("Loading data from", archive)
-	reader, err := zip.OpenReader(archive)
+	zipReader, err := zip.OpenReader(archive)
 	if err != nil {
 		return err
 	}
-	defer reader.Close()
+	defer zipReader.Close()
 
-	for _, file := range reader.File {
+	for _, file := range zipReader.File {
 		name := file.Name[:strings.LastIndex(file.Name, ".")]
 
 		if name == "options" {
@@ -35,53 +36,32 @@ func LoadData(archive string, d *Database) error {
 			tm, test := options[0], options[1]
 			log.Println("Data generation timestamp", tm, "with type", test)
 
-			f.Close()
+			if err = f.Close(); err != nil {
+				return err
+			}
 			continue
 		}
 
 		entity := name[:strings.LastIndex(name, "_")]
-
 		reader, err := file.Open()
 		if err != nil {
 			return err
 		}
-
-		switch entity {
-		case "users":
-			users := new(Users)
-			if err := parse(reader, &users); err != nil {
-				return err
-			}
-			if err := d.PopulateUsers(users); err != nil {
-				return err
-			}
-		case "locations":
-			locations := new(Locations)
-			if err := parse(reader, &locations); err != nil {
-				return err
-			}
-			if err := d.PopulateLocations(locations); err != nil {
-				return err
-			}
-		case "visits":
-			visits := new(Visits)
-			if err := parse(reader, &visits); err != nil {
-				return err
-			}
-			if err := d.PopulateVisits(visits); err != nil {
-				return err
-			}
+		if err = loadEntity(entity, &reader, d); err != nil {
+			return err
 		}
 
-		reader.Close()
+		if err = reader.Close(); err != nil {
+			return err
+		}
 	}
 
 	log.Println("Loaded data from", archive)
 	return nil
 }
 
-func parse(reader io.ReadCloser, v interface{}) error {
-	data, err := ioutil.ReadAll(reader)
+func parse(reader *io.ReadCloser, v interface{}) error {
+	data, err := ioutil.ReadAll(*reader)
 	if err != nil {
 		return err
 	}
@@ -91,4 +71,46 @@ func parse(reader io.ReadCloser, v interface{}) error {
 	}
 
 	return nil
+}
+
+func loadEntity(entity string, r *io.ReadCloser, d *Database) error {
+	switch entity {
+	case "users":
+		if err := loadUsers(r, d); err != nil {
+			return err
+		}
+	case "locations":
+		if err := loadLocations(r, d); err != nil {
+			return err
+		}
+	case "visits":
+		if err := loadVisits(r, d); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func loadUsers(r *io.ReadCloser, d *Database) error {
+	users := new(Users)
+	if err := parse(r, &users); err != nil {
+		return err
+	}
+	return d.PopulateUsers(users)
+}
+
+func loadLocations(r *io.ReadCloser, d *Database) error {
+	locations := new(Locations)
+	if err := parse(r, &locations); err != nil {
+		return err
+	}
+	return d.PopulateLocations(locations)
+}
+
+func loadVisits(r *io.ReadCloser, d *Database) error {
+	visits := new(Visits)
+	if err := parse(r, &visits); err != nil {
+		return err
+	}
+	return d.PopulateVisits(visits)
 }
