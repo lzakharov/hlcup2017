@@ -1,4 +1,4 @@
-package utils
+package main
 
 import (
 	"archive/zip"
@@ -7,12 +7,9 @@ import (
 	"io/ioutil"
 	"log"
 	"strings"
-
-	"github.com/lzakharov/hlcup2017/models"
 )
 
-// LoadData loads data from archive.
-func LoadData(archive string) error {
+func LoadData(archive string, d *Database) error {
 	log.Println("Loading data from", archive)
 	reader, err := zip.OpenReader(archive)
 	if err != nil {
@@ -26,12 +23,12 @@ func LoadData(archive string) error {
 		if name == "options" {
 			f, err := file.Open()
 			if err != nil {
-				log.Panic(err)
+				return err
 			}
 
 			bytes, err := ioutil.ReadAll(f)
 			if err != nil {
-				log.Panic(err)
+				return err
 			}
 
 			options := strings.Split(string(bytes), "\n")
@@ -46,33 +43,33 @@ func LoadData(archive string) error {
 
 		reader, err := file.Open()
 		if err != nil {
-			log.Panic(err)
+			return err
 		}
 
 		switch entity {
 		case "users":
-			users := new(models.Users)
+			users := new(Users)
 			if err := parse(reader, &users); err != nil {
-				log.Panic(err)
+				return err
 			}
-			if err := models.PopulateUsers(users); err != nil {
-				log.Panic(err)
+			if err := d.PopulateUsers(users); err != nil {
+				return err
 			}
 		case "locations":
-			locations := new(models.Locations)
+			locations := new(Locations)
 			if err := parse(reader, &locations); err != nil {
-				log.Panic(err)
+				return err
 			}
-			if err := models.PopulateLocations(locations); err != nil {
-				log.Panic(err)
+			if err := d.PopulateLocations(locations); err != nil {
+				return err
 			}
 		case "visits":
-			visits := new(models.Visits)
+			visits := new(Visits)
 			if err := parse(reader, &visits); err != nil {
-				log.Panic(err)
+				return err
 			}
-			if err := models.PopulateVisits(visits); err != nil {
-				log.Panic(err)
+			if err := d.PopulateVisits(visits); err != nil {
+				return err
 			}
 		}
 

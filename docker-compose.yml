@@ -8,6 +8,6 @@ services:
       - .:/go/src/github.com/lzakharov/hlcup2017
     depends_on:
       - db
-    command: ["sh", "./wait-for-postgres.sh", "db", "realize", "start"]
+    command: ["realize", "start"]
   db:
     image: postgres

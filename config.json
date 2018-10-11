@@ -11,5 +11,5 @@
         "sslmode": "disable",
         "schema": "schema.sql"
     },
-    "data": "data/data.zip"
+    "data": "data.zip"
 }
