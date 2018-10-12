@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"os"
 )
 
 // Config contains server properties.
 type Config struct {
 	Host     string    `json:"host"`
-	Port     int       `json:"port"`
+	Port     string    `json:"port"`
 	DBConfig *DBConfig `json:"db"`
 	Data     string    `json:"data"`
 }
@@ -53,5 +54,5 @@ func (d *DBConfig) GetDSN() string {
 
 // GetAddr returns sever address.
 func (c *Config) GetAddr() string {
-	return fmt.Sprintf("%s:%d", c.Host, c.Port)
+	return net.JoinHostPort(c.Host, c.Port)
 }

@@ -1,6 +1,6 @@
 {
     "host": "",
-    "port": 8000,
+    "port": "8000",
     "db": {
         "driver": "postgres",
         "host": "db",
