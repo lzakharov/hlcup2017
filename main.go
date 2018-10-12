@@ -5,10 +5,13 @@ import (
 )
 
 func main() {
-	c := ConfigurationLoad("config.json")
+	c, err := ConfigurationLoad("config.json")
+	if err != nil {
+		log.Panic(err)
+	}
 
 	a := new(App)
-	err := a.Initialize(c)
+	err = a.Initialize(c)
 	if err != nil {
 		log.Panic(err)
 	}

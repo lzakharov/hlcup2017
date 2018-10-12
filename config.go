@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net"
 	"os"
 )
@@ -29,21 +28,21 @@ type DBConfig struct {
 }
 
 // ConfigurationLoad returns server configurations parsed from the specified file.
-func ConfigurationLoad(file string) *Config {
+func ConfigurationLoad(file string) (*Config, error) {
 	config := new(Config)
 
 	r, err := os.Open(file)
 	if err != nil {
-		log.Panic(err)
+		return nil, err
 	}
 	defer r.Close()
 
 	dec := json.NewDecoder(r)
 	if err := dec.Decode(config); err != nil {
-		log.Panic(err)
+		return nil, err
 	}
 
-	return config
+	return config, nil
 }
 
 // GetDSN returns database source name.
