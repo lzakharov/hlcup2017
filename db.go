@@ -1,7 +1,7 @@
 package main
 
 import (
-	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -37,37 +37,32 @@ var (
 // Initialize database with specified configuration.
 // Tries to connect to the database every reconnectionTime until connectionTimeout.
 func (d *Database) Initialize(c *DBConfig) error {
-	ctx, cancel := context.WithTimeout(context.Background(), connectionTimeout)
-	defer cancel()
-	if err := d.connect(ctx, c); err != nil {
+	if err := d.connect(c); err != nil {
 		return err
 	}
-	log.Println("Database connected")
 
 	d.StatementBuilder = sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 	return d.createSchema(c.Schema)
 }
 
-func (d *Database) connect(ctx context.Context, c *DBConfig) error {
+func (d *Database) connect(c *DBConfig) error {
 	var err error
-	connected := make(chan struct{})
+	timeout := time.After(connectionTimeout)
+	tick := time.Tick(reconnectionTime)
 
-	go func() {
-		for {
-			if d.Socket, err = sqlx.Connect(c.Driver, c.GetDSN()); err == nil {
-				connected <- struct{}{}
+	for {
+		select {
+		case <-timeout:
+			log.Println("Database connection timeout")
+			return errors.New("database connection timeout")
+		case <-tick:
+			log.Println("Database connection...")
+			d.Socket, err = sqlx.Connect(c.Driver, c.GetDSN())
+			if err == nil {
+				log.Println("Database connected")
+				return nil
 			}
-			time.Sleep(reconnectionTime)
-			log.Println("Database reconnection...")
 		}
-	}()
-
-	select {
-	case <-ctx.Done():
-		log.Println("Database connection timeout")
-		return ctx.Err()
-	case <-connected:
-		return nil
 	}
 }
 
